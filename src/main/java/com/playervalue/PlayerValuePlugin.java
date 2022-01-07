@@ -137,8 +137,9 @@ public class PlayerValuePlugin extends Plugin
 				}
 			}
 		}
-		String value = formatInventoryValue(geTotal);
-		setInventoryValue(value);
+		ValueFormatter value = formatValue(geTotal);
+		setInventoryValue(value.formattedString);
+		this.inventoryColor = value.color;
 	}
 
 	public void updateEquipmentValue()
@@ -161,8 +162,9 @@ public class PlayerValuePlugin extends Plugin
 				}
 			}
 		}
-		String value = formatEquipmentValue(geTotal);
-		setEquipmentValue(value);
+		ValueFormatter value = formatValue(geTotal);
+		setEquipmentValue(value.formattedString);
+		this.equipmentColor= value.color;
 	}
 
 	public void updateRiskValue()
@@ -183,8 +185,9 @@ public class PlayerValuePlugin extends Plugin
 			riskTotal -= risk;
 		}
 
-		String value = formatRiskValue(riskTotal);
-		setRiskValue(value);
+		ValueFormatter value = formatValue(riskTotal);
+		setRiskValue(value.formattedString);
+		this.riskColor = value.color;
 		combinedValues.clear();
 	}
 
@@ -198,112 +201,16 @@ public class PlayerValuePlugin extends Plugin
 				val += v;
 			}
 		}
-		String value = formatValue(val);
-		setTotalValue(value);
+
+		ValueFormatter value = formatValue(val);
+		setTotalValue(value.formattedString);
+		this.totalColor = value.color;
 	}
 
-	public String formatValue(long value)
+	public ValueFormatter formatValue(long value)
 	{
-		long f = 0;
-		String text = "";
-
-		if(value >= 10000000)
-		{
-			f = value / 1000000;
-			text = Long.toString(f) + "M";
-			totalColor = Color.GREEN;
-		}
-		else if(value >= 100000)
-		{
-			f = value / 1000;
-			text = Long.toString(f) + "K";
-			totalColor = Color.WHITE;
-		}
-		else
-		{
-			text = Long.toString(value) + "gp";
-			totalColor = Color.YELLOW;
-		}
-
-		return text;
-	}
-
-	public String formatInventoryValue(long value)
-	{
-		long f = 0;
-		String text="";
-
-		if(value >= 10000000)
-		{
-			f = value / 1000000;
-			text = Long.toString(f) + "M";
-			inventoryColor = Color.GREEN;
-		}
-		else if(value >= 100000)
-		{
-			f = value / 1000;
-			text = Long.toString(f) + "K";
-			inventoryColor = Color.WHITE;
-		}
-		else
-		{
-			text = Long.toString(value) + "gp";
-			inventoryColor = Color.YELLOW;
-		}
-
-		return text;
-	}
-
-	public String formatEquipmentValue(long value)
-	{
-		long f = 0;
-		String text="";
-
-		if(value >= 10000000)
-		{
-			f = value / 1000000;
-			text = Long.toString(f) + "M";
-			equipmentColor = Color.GREEN;
-		}
-		else if(value >= 100000)
-		{
-			f = value / 1000;
-			text = Long.toString(f) + "K";
-			equipmentColor = Color.WHITE;
-		}
-		else
-		{
-			text = Long.toString(value) + "gp";
-			equipmentColor = Color.YELLOW;
-		}
-
-		return text;
-	}
-
-	public String formatRiskValue(long value)
-	{
-		long f = 0;
-		String text="";
-
-		if(value >= 10000000)
-		{
-			f = value / 1000000;
-			text = Long.toString(f) + "M";
-			riskColor = Color.GREEN;
-		}
-		else if(value >= 100000)
-		{
-			f = value / 1000;
-			text = Long.toString(f) + "K";
-			riskColor = Color.WHITE;
-		}
-		else
-		{
-			text = Long.toString(value) + "gp";
-			riskColor = Color.YELLOW;
-		}
-
-		return text;
+		ValueFormatter vf = new ValueFormatter(value);
+		return vf;
 	}
 
 	public void setInventoryValue(String value)
