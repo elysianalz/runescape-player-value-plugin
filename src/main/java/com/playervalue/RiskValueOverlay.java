@@ -12,7 +12,7 @@ import java.awt.*;
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 
-public class PlayerValueOverlay extends OverlayPanel
+public class RiskValueOverlay extends OverlayPanel
 {
     private PlayerValuePlugin plugin;
     private PlayerValueConfig config;
@@ -20,7 +20,7 @@ public class PlayerValueOverlay extends OverlayPanel
     private ItemManager itemManager;
 
     @Inject
-    private PlayerValueOverlay(PlayerValuePlugin plugin, PlayerValueConfig config)
+    private RiskValueOverlay(PlayerValuePlugin plugin, PlayerValueConfig config)
     {
         super(plugin);
         setPosition(OverlayPosition.BOTTOM_RIGHT);
@@ -33,8 +33,8 @@ public class PlayerValueOverlay extends OverlayPanel
     // needed to render and configure overlay
     public Dimension render(Graphics2D graphics)
     {
-        String playerValue = plugin.getPlayerValue();
-        Color textColor = plugin.getTextColor();
+        String playerValue = plugin.getRiskValue();
+        Color textColor = plugin.getRiskColor();
 
         panelComponent.getChildren().add(TitleComponent.builder()
                 .text(playerValue)
@@ -49,3 +49,5 @@ public class PlayerValueOverlay extends OverlayPanel
     }
 
 }
+
+
