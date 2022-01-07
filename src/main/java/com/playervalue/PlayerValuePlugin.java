@@ -131,6 +131,7 @@ public class PlayerValuePlugin extends Plugin
 				for (int i = 0; i < inventoryContainer.size(); ++i)
 				{
 					Item child = children[i];
+
 					if (child != null && child.getId() > BAD_ID)
 					{
 						final long value = itemManager.getItemPrice(child.getId()) * child.getQuantity(); // must be used in subscribed method
@@ -176,7 +177,7 @@ public class PlayerValuePlugin extends Plugin
 		long riskTotal = ZERO;
 		long risk = ZERO;
 
-		if(combinedValues.size() >= RISK_BUFFER)
+		if (combinedValues.size() >= RISK_BUFFER)
 		{
 			Collections.sort(combinedValues, Collections.reverseOrder());
 
@@ -198,6 +199,7 @@ public class PlayerValuePlugin extends Plugin
 	public void updateTotalValue()
 	{
 		long val = ZERO;
+
 		if(combinedValues.size() > EMPTY)
 		{
 			for (long v : combinedValues)
