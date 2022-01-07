@@ -31,6 +31,7 @@ public class PlayerValuePlugin extends Plugin
 	private Color inventoryColor = Color.YELLOW;
 	private Color equipmentColor = Color.WHITE;
 	private Color riskColor = Color.GREEN;
+	private Color totalColor = Color.YELLOW;
 	private ArrayList<Long> combinedValues = new ArrayList<Long>();
 
 	@Inject
@@ -55,6 +56,9 @@ public class PlayerValuePlugin extends Plugin
 	private RiskValueOverlay rOverlay;
 
 	@Inject
+	private TotalValueOverlay tOverlay;
+
+	@Inject
 	private ItemManager itemManager;
 
 	@Override
@@ -63,22 +67,28 @@ public class PlayerValuePlugin extends Plugin
 		overlayManager.add(overlay);
 		overlayManager.add(eOverlay);
 		overlayManager.add(rOverlay);
+		overlayManager.add(tOverlay);
 	}
 
 	@Nullable
-	public String getInventoryValue() {return inventoryValue;}
+	public String getInventoryValue() { return inventoryValue; }
 
 	@Nullable
-	public String getEquipmentValue() {return equipmentValue;}
+	public String getEquipmentValue() { return equipmentValue; }
 
 	@Nullable
-	public String getRiskValue() {return riskValue;}
+	public String getRiskValue() { return riskValue; }
 
-	public Color getInventoryColor() {return inventoryColor;}
+	@Nullable
+	public String getTotalValue() { return totalValue; }
 
-	public Color getEquipmentColor() {return equipmentColor;}
+	public Color getInventoryColor() { return inventoryColor; }
 
-	public Color getRiskColor() {return riskColor;}
+	public Color getEquipmentColor() { return equipmentColor; }
+
+	public Color getRiskColor() { return riskColor; }
+
+	public Color getTotalColor() { return totalColor; }
 
 	@Override
 	protected void shutDown()
@@ -91,6 +101,7 @@ public class PlayerValuePlugin extends Plugin
 	{
 		updateInventoryValue();
 		updateEquipmentValue();
+		updateTotalValue();
 		updateRiskValue();
 	}
 
@@ -101,6 +112,7 @@ public class PlayerValuePlugin extends Plugin
 		{
 			updateInventoryValue();
 			updateEquipmentValue();
+			updateTotalValue();
 			updateRiskValue();
 		}
 	}
@@ -178,7 +190,42 @@ public class PlayerValuePlugin extends Plugin
 
 	public void updateTotalValue()
 	{
+		long val = 0;
+		if(combinedValues.size() > 0)
+		{
+			for (long v : combinedValues)
+			{
+				val += v;
+			}
+		}
+		String value = formatValue(val);
+		setTotalValue(value);
+	}
 
+	public String formatValue(long value)
+	{
+		long f = 0;
+		String text = "";
+
+		if(value >= 10000000)
+		{
+			f = value / 1000000;
+			text = Long.toString(f) + "M";
+			totalColor = Color.GREEN;
+		}
+		else if(value >= 100000)
+		{
+			f = value / 1000;
+			text = Long.toString(f) + "K";
+			totalColor = Color.WHITE;
+		}
+		else
+		{
+			text = Long.toString(value) + "gp";
+			totalColor = Color.YELLOW;
+		}
+
+		return text;
 	}
 
 	public String formatInventoryValue(long value)
@@ -272,6 +319,11 @@ public class PlayerValuePlugin extends Plugin
 	public void setRiskValue(String value)
 	{
 		this.riskValue = "Risk: " + value;
+	}
+
+	public void setTotalValue(String value)
+	{
+		this.totalValue = "Total: " + value;
 	}
 
 	@Provides
