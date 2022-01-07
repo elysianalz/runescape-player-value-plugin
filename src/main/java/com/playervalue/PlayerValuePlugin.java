@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -24,6 +23,20 @@ import java.util.Collections;
 )
 public class PlayerValuePlugin extends Plugin
 {
+	// constants
+	private final String SPACE = " ";
+	private final String INVENTORY = "Inventory:";
+	private final String EQUIP = "Equip:";
+	private final String TOTAL = "Total:";
+	private final String RISK = "Risk:";
+	private final int EMPTY = 0;
+	private final int ZERO = 0;
+	private final int ITEM_ONE = 0;
+	private final int ITEM_TWO = 1;
+	private final int ITEM_THREE = 2;
+	private final int RISK_BUFFER = 3;
+	private final int BAD_ID = -1;
+
 	private String inventoryValue = "MY INV VALUE";
 	private String equipmentValue = "MY EQUIP VALUE";
 	private String riskValue = "MY RISK VALUE";
@@ -105,38 +118,29 @@ public class PlayerValuePlugin extends Plugin
 		updateRiskValue();
 	}
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged event)
-	{
-		if(event.getGameState() == GameState.LOGGED_IN)
-		{
-			updateInventoryValue();
-			updateEquipmentValue();
-			updateTotalValue();
-			updateRiskValue();
-		}
-	}
-
 	public void updateInventoryValue()
 	{
-		long geTotal = 0;
-		final ItemContainer inventoryContainer = client.getItemContainer(InventoryID.INVENTORY);
+		long geTotal = ZERO;
 
-		if (inventoryContainer.size() > 0 && inventoryContainer != null && inventoryContainer.getItems().length != 0);
-		{
+		try {
+			final ItemContainer inventoryContainer = client.getItemContainer(InventoryID.INVENTORY);
 			final Item[] children = inventoryContainer.getItems();
 
-			for (int i = 0; i < inventoryContainer.size(); ++i)
+			if (inventoryContainer != null && children != null);
 			{
-				Item child = children[i];
-				if (child != null && child.getId() > -1)
+				for (int i = 0; i < inventoryContainer.size(); ++i)
 				{
-					final long value = itemManager.getItemPrice(child.getId()) * child.getQuantity(); // must be used in subscribed method
-					geTotal = geTotal + value;
-					combinedValues.add(value);
+					Item child = children[i];
+					if (child != null && child.getId() > BAD_ID)
+					{
+						final long value = itemManager.getItemPrice(child.getId()) * child.getQuantity(); // must be used in subscribed method
+						geTotal = geTotal + value;
+						combinedValues.add(value);
+					}
 				}
 			}
-		}
+		} catch (NullPointerException e){}
+
 		ValueFormatter value = formatValue(geTotal);
 		setInventoryValue(value.formattedString);
 		this.inventoryColor = value.color;
@@ -144,17 +148,17 @@ public class PlayerValuePlugin extends Plugin
 
 	public void updateEquipmentValue()
 	{
-		long geTotal = 0;
+		long geTotal = ZERO;
 		ItemContainer equipmentContainer = client.getItemContainer(InventoryID.EQUIPMENT);
 
-		if (equipmentContainer != null && equipmentContainer.size() > 0 && equipmentContainer.getItems().length != 0)
+		if (equipmentContainer != null)
 		{
 			final Item[] children = equipmentContainer.getItems();
 
 			for (int i = 0; i < equipmentContainer.size(); ++i)
 			{
 				Item child = children[i];
-				if (child != null && child.getId() > -1)
+				if (child != null && child.getId() > BAD_ID)
 				{
 					final long value = itemManager.getItemPrice(child.getId()) * child.getQuantity();
 					geTotal += value;
@@ -169,10 +173,10 @@ public class PlayerValuePlugin extends Plugin
 
 	public void updateRiskValue()
 	{
-		long riskTotal = 0;
-		long risk = 0;
+		long riskTotal = ZERO;
+		long risk = ZERO;
 
-		if(combinedValues.size() >= 3)
+		if(combinedValues.size() >= RISK_BUFFER)
 		{
 			Collections.sort(combinedValues, Collections.reverseOrder());
 
@@ -181,20 +185,20 @@ public class PlayerValuePlugin extends Plugin
 				riskTotal += val;
 			}
 
-			risk = combinedValues.get(0) + combinedValues.get(1) + combinedValues.get(2);
+			risk = combinedValues.get(ITEM_ONE) + combinedValues.get(ITEM_TWO) + combinedValues.get(ITEM_THREE);
 			riskTotal -= risk;
 		}
 
 		ValueFormatter value = formatValue(riskTotal);
 		setRiskValue(value.formattedString);
 		this.riskColor = value.color;
-		combinedValues.clear();
+		combinedValues.clear(); // temporary fix needs refactor
 	}
 
 	public void updateTotalValue()
 	{
-		long val = 0;
-		if(combinedValues.size() > 0)
+		long val = ZERO;
+		if(combinedValues.size() > EMPTY)
 		{
 			for (long v : combinedValues)
 			{
@@ -215,22 +219,22 @@ public class PlayerValuePlugin extends Plugin
 
 	public void setInventoryValue(String value)
 	{
-		this.inventoryValue = "Inventory: " + value;
+		this.inventoryValue = INVENTORY + SPACE + value;
 	}
 
 	public void setEquipmentValue(String value)
 	{
-		this.equipmentValue = "Equip: " + value;
+		this.equipmentValue = EQUIP + SPACE + value;
 	}
 
 	public void setRiskValue(String value)
 	{
-		this.riskValue = "Risk: " + value;
+		this.riskValue = RISK + SPACE + value;
 	}
 
 	public void setTotalValue(String value)
 	{
-		this.totalValue = "Total: " + value;
+		this.totalValue = TOTAL + SPACE + value;
 	}
 
 	@Provides
