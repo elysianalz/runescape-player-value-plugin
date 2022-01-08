@@ -41,6 +41,7 @@ public class ValueFormatter {
            this.grade = LOW;
         }
     }
+    
     public void formatValue()
     {
         long f;
